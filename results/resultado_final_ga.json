@@ -1,0 +1,26 @@
+{
+    "experimento_vencedor": "Experimento 1",
+    "individuo": [
+        2,
+        1,
+        1
+    ],
+    "hiperparametros": {
+        "C": 0.1,
+        "class_weight": "balanced",
+        "solver": "liblinear",
+        "penalty": "l2"
+    },
+    "fitness_validacao": 0.9686267398917501,
+    "metricas_teste": {
+        "accuracy": 0.9912280701754386,
+        "precision": 1.0,
+        "recall": 0.9761904761904762,
+        "f1": 0.9879518072289156,
+        "roc_auc": 0.9976851851851852,
+        "tn": 72,
+        "fp": 0,
+        "fn": 1,
+        "tp": 41
+    }
+}
