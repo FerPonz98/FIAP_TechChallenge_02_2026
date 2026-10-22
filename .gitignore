@@ -30,3 +30,4 @@ htmlcov/
 
 # Models temporários
 models/*.tmp
+k8s/secret.yaml

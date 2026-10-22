@@ -23,3 +23,5 @@ openai
 
 pytest
 pytest-cov
+
+prometheus-client

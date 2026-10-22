@@ -1,5 +1,4 @@
 services:
-
   api:
     build:
       context: .
@@ -29,7 +28,6 @@ services:
     networks:
       - fiap_network
 
-
   jupyter:
     build:
       context: .
@@ -55,11 +53,11 @@ services:
       - .env
 
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
     networks:
       - fiap_network
-
 
   postgres:
     image: postgres:16-alpine
@@ -72,24 +70,19 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
 
     ports:
-      - "5432:5432"
+      - "5435:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
     networks:
       - fiap_network
-
 
   n8n:
     image: n8nio/n8n:latest
@@ -100,11 +93,11 @@ services:
       - "5678:5678"
 
     environment:
-      - N8N_HOST=localhost
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      - GENERIC_TIMEZONE=${TZ}
-      - TZ=${TZ}
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      GENERIC_TIMEZONE: ${TZ}
+      TZ: ${TZ}
 
     volumes:
       - n8n_data:/home/node/.n8n
@@ -112,11 +105,9 @@ services:
     networks:
       - fiap_network
 
-
 volumes:
   postgres_data:
   n8n_data:
-
 
 networks:
   fiap_network:

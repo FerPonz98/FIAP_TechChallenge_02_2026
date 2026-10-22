@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: fiap-fase2-api-service
+
+spec:
+  type: LoadBalancer
+
+  selector:
+    app: fiap-fase2-api
+
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
