@@ -14,14 +14,12 @@ fastapi
 uvicorn[standard]
 pydantic
 
-sqlalchemy
-psycopg2-binary
-
 python-dotenv
 httpx
+requests
 openai
+
+prometheus-client
 
 pytest
 pytest-cov
-
-prometheus-client

@@ -1,3 +1,4 @@
+# Somente ambiente local (Docker Desktop). Não usar em produção.
 spec:
   template:
     spec:

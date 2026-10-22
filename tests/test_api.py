@@ -1,5 +1,7 @@
 from unittest.mock import patch
 
+from src.llm_service import LLMIndisponivelError
+
 import pandas as pd
 
 from fastapi.testclient import TestClient
@@ -183,3 +185,58 @@ def test_interpret(
     )
 
     mock_gerar_explicacao.assert_called_once()
+
+
+@patch(
+    "api.main.gerar_explicacao",
+    side_effect=LLMIndisponivelError(
+        "Falha simulada."
+    ),
+)
+def test_interpret_com_llm_indisponivel(
+    mock_gerar_explicacao,
+):
+    payload = carregar_payload()
+
+    resposta = cliente.post(
+        "/interpret",
+        json=payload,
+    )
+
+    # A API continua respondendo com a predição e o SHAP
+    assert resposta.status_code == 200
+
+    dados = resposta.json()
+
+    assert dados["classificacao"] in [
+        "Benigno",
+        "Maligno",
+    ]
+
+    assert (
+        len(
+            dados["principais_fatores"]
+        )
+        == 5
+    )
+
+    assert dados["explicacao_llm"] is None
+
+    assert "LLM indisponível" in dados["aviso"]
+
+
+def test_predict_com_variavel_ausente():
+    payload = carregar_payload()
+
+    payload["dados"].pop(
+        "radius_mean"
+    )
+
+    resposta = cliente.post(
+        "/predict",
+        json=payload,
+    )
+
+    assert resposta.status_code == 400
+
+    assert "radius_mean" in resposta.json()["detail"]

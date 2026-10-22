@@ -22,6 +22,7 @@ from src.explainability_service import (
 )
 
 from src.llm_service import (
+    LLMIndisponivelError,
     gerar_explicacao,
 )
 
@@ -35,9 +36,6 @@ from src.prediction_service import (
 )
 
 
-# =========================================================
-# Aplicação FastAPI
-# =========================================================
 
 app = FastAPI(
     title="FIAP Tech Challenge - Fase 2",
@@ -49,10 +47,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-
-# =========================================================
-# Métricas Prometheus
-# =========================================================
 
 TOTAL_REQUISICOES = Counter(
     "api_requisicoes_total",
@@ -74,10 +68,6 @@ TEMPO_REQUISICAO = Histogram(
     ],
 )
 
-
-# =========================================================
-# Middleware de logging e monitoramento
-# =========================================================
 
 @app.middleware("http")
 async def registrar_requisicao(
@@ -123,12 +113,49 @@ async def registrar_requisicao(
     return resposta
 
 
-# =========================================================
-# Modelos de entrada e saída
-# =========================================================
-
 class PacienteRequest(BaseModel):
     dados: dict[str, float]
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "dados": {
+                    "radius_mean": 17.99,
+                    "texture_mean": 10.38,
+                    "perimeter_mean": 122.8,
+                    "area_mean": 1001.0,
+                    "smoothness_mean": 0.1184,
+                    "compactness_mean": 0.2776,
+                    "concavity_mean": 0.3001,
+                    "concave points_mean": 0.1471,
+                    "symmetry_mean": 0.2419,
+                    "fractal_dimension_mean": 0.07871,
+                    "radius_se": 1.095,
+                    "texture_se": 0.9053,
+                    "perimeter_se": 8.589,
+                    "area_se": 153.4,
+                    "smoothness_se": 0.006399,
+                    "compactness_se": 0.04904,
+                    "concavity_se": 0.05373,
+                    "concave points_se": 0.01587,
+                    "symmetry_se": 0.03003,
+                    "fractal_dimension_se": 0.006193,
+                    "radius_worst": 25.38,
+                    "texture_worst": 17.33,
+                    "perimeter_worst": 184.6,
+                    "area_worst": 2019.0,
+                    "smoothness_worst": 0.1622,
+                    "compactness_worst": 0.6656,
+                    "concavity_worst": 0.7119,
+                    "concave points_worst": 0.2654,
+                    "symmetry_worst": 0.4601,
+                    "fractal_dimension_worst": 0.1189
+                    }
+                }
+            ]
+        }
+    }
 
 
 class PredicaoResponse(BaseModel):
@@ -149,12 +176,10 @@ class InterpretacaoResponse(BaseModel):
     threshold: float
     classificacao: str
     principais_fatores: list[FatorShap]
-    explicacao_llm: str
+    explicacao_llm: str | None = None
+    aviso: str | None = None
 
 
-# =========================================================
-# Endpoint raiz
-# =========================================================
 
 @app.get("/")
 def raiz():
@@ -165,10 +190,6 @@ def raiz():
     }
 
 
-# =========================================================
-# Health Check
-# =========================================================
-
 @app.get("/health")
 def health():
     return {
@@ -177,21 +198,12 @@ def health():
     }
 
 
-# =========================================================
-# Métricas Prometheus
-# =========================================================
-
 @app.get("/metrics")
 def metricas():
     return Response(
         content=generate_latest(),
         media_type=CONTENT_TYPE_LATEST,
     )
-
-
-# =========================================================
-# Variáveis utilizadas pelo modelo
-# =========================================================
 
 @app.get("/features")
 def listar_variaveis():
@@ -286,33 +298,6 @@ def interpretar(
             requisicao.dados
         )
 
-        explicacao = gerar_explicacao(
-            resultado,
-            fatores,
-        )
-
-        logger.info(
-            "Interpretação realizada | "
-            "Classificação=%s | "
-            "Probabilidade=%.6f | "
-            "Fatores_SHAP=%d",
-            resultado[
-                "classificacao"
-            ],
-            resultado[
-                "probabilidade_malignidade"
-            ],
-            len(fatores),
-        )
-
-        return {
-            **resultado,
-            "principais_fatores":
-                fatores,
-            "explicacao_llm":
-                explicacao,
-        }
-
     except ValueError as erro:
         logger.warning(
             "Erro de validação na interpretação: %s",
@@ -335,3 +320,51 @@ def interpretar(
                 "Erro interno durante a interpretação."
             ),
         )
+
+    # A falha da LLM não invalida a predição nem o SHAP:
+    # a API responde com o resultado do modelo e um aviso.
+    explicacao = None
+    aviso = None
+
+    try:
+        explicacao = gerar_explicacao(
+            resultado,
+            fatores,
+        )
+
+    except LLMIndisponivelError as erro:
+        logger.error(
+            "LLM indisponível: %s",
+            erro,
+        )
+
+        aviso = (
+            "LLM indisponível. A classificação e os fatores SHAP "
+            "foram gerados normalmente pelo modelo."
+        )
+
+    logger.info(
+        "Interpretação realizada | "
+        "Classificação=%s | "
+        "Probabilidade=%.6f | "
+        "Fatores_SHAP=%d | "
+        "LLM=%s",
+        resultado[
+            "classificacao"
+        ],
+        resultado[
+            "probabilidade_malignidade"
+        ],
+        len(fatores),
+        "ok" if explicacao else "indisponível",
+    )
+
+    return {
+        **resultado,
+        "principais_fatores":
+            fatores,
+        "explicacao_llm":
+            explicacao,
+        "aviso":
+            aviso,
+    }
