@@ -1,52 +1,47 @@
 caso,indice,probabilidade,threshold,classificacao,classe_real,explicacao
 Alta probabilidade,108,0.9999968921347974,0.34000000000000014,Maligno,Maligno,"## 1. Resumo do resultado
-
 O modelo estimou uma probabilidade de malignidade de **100,00%**. Como esse valor está acima do threshold utilizado (**0,34**), a classificação fornecida pelo modelo é **“Maligno”**.
 
 ## 2. Principais fatores que influenciaram a previsão
+Segundo a análise SHAP, os fatores abaixo aumentaram a tendência da previsão para malignidade:
 
-Segundo os valores SHAP informados, os fatores abaixo contribuíram para aumentar a tendência da previsão em direção à malignidade:
-
-- **radius_se** — valor: 1,2910; SHAP: 1,4634
-- **area_worst** — valor: 2782,0000; SHAP: 1,4421
-- **radius_worst** — valor: 30,7900; SHAP: 1,4220
-- **perimeter_worst** — valor: 211,5000; SHAP: 1,3410
-- **perimeter_se** — valor: 9,6350; SHAP: 1,1328
+- **radius_se**: valor **1,2910**; SHAP **1,4634**
+- **area_worst**: valor **2782,0000**; SHAP **1,4421**
+- **radius_worst**: valor **30,7900**; SHAP **1,4220**
+- **perimeter_worst**: valor **211,5000**; SHAP **1,3410**
+- **perimeter_se**: valor **9,6350**; SHAP **1,1328**
 
 ## 3. Interpretação do resultado
-
-A previsão do modelo foi classificada como **maligna**, e os fatores listados contribuíram para essa classificação de acordo com a análise SHAP. Esses valores descrevem a influência das variáveis na saída do modelo; não demonstram, por si só, causalidade nem confirmam um diagnóstico.
-
-A probabilidade de 100,00% é uma estimativa produzida pelo modelo, não uma certeza clínica.
+A previsão do modelo foi fortemente direcionada para a classe **“Maligno”**, com os fatores listados contribuindo nessa direção. A probabilidade de 100,00% é uma estimativa do modelo, não uma confirmação diagnóstica.
 
 ## 4. Limitações e recomendação de revisão clínica
-
-Este resultado deve ser usado **como apoio à decisão**, e não como substituto da avaliação de um profissional de saúde. A interpretação depende do modelo, dos dados utilizados e de seu desempenho e calibração, que não podem ser avaliados apenas com as informações fornecidas.
-
-Recomenda-se que o resultado seja revisado por um profissional de saúde, em conjunto com os demais dados clínicos e exames disponíveis."
+Este resultado é um apoio à decisão e não substitui a avaliação de um profissional de saúde. A classificação depende do modelo e dos dados utilizados e deve ser revisada por um profissional, em conjunto com a avaliação clínica apropriada."
 Próximo ao threshold,85,0.34940163832405036,0.34000000000000014,Maligno,Benigno,"## 1. Resumo do resultado
-O modelo estimou uma probabilidade de malignidade de **34,94%**. Como esse valor está acima do threshold utilizado (**0,34**), a classificação fornecida pelo modelo é **Maligno**.
+
+O modelo estimou uma probabilidade de malignidade de **34,94%**. Como esse valor está acima do threshold utilizado (**0,34**), a classificação fornecida pelo modelo é **“Maligno”**.
 
 ## 2. Principais fatores que influenciaram a previsão
-Segundo os valores SHAP apresentados:
 
-- **texture_worst** (38,8100; SHAP **+1,2746**) e **texture_mean** (29,2900; SHAP **+0,9670**) aumentaram a tendência da previsão para malignidade.
-- **radius_worst** (13,1200; SHAP **−0,4121**), **concave points_worst** (0,0683; SHAP **−0,3859**) e **concave points_mean** (0,0202; SHAP **−0,3796**) reduziram essa tendência.
-
-Esses valores descrevem a contribuição dos fatores para a previsão deste modelo; não indicam, por si só, a importância clínica de cada característica.
+- **texture_worst** (valor: 38,8100; SHAP: +1,2746): aumentou a tendência da previsão para malignidade.
+- **texture_mean** (valor: 29,2900; SHAP: +0,9670): também aumentou essa tendência.
+- **radius_worst** (valor: 13,1200; SHAP: −0,4121): reduziu a tendência para malignidade.
+- **concave points_worst** (valor: 0,0683; SHAP: −0,3859): reduziu essa tendência.
+- **concave points_mean** (valor: 0,0202; SHAP: −0,3796): também reduziu essa tendência.
 
 ## 3. Interpretação do resultado
-A classificação resulta da aplicação do threshold definido pelo modelo: a probabilidade estimada ultrapassou esse limite. Isso **não equivale a um diagnóstico**, e a probabilidade não deve ser interpretada isoladamente como confirmação ou exclusão de câncer.
+
+A classificação resulta da aplicação do threshold à probabilidade estimada: **34,94%** é ligeiramente superior a **34%**. Os fatores listados contribuíram em direções diferentes para a previsão, conforme indicado pelos valores SHAP. Esses valores descrevem a contribuição dos fatores para a saída do modelo; não estabelecem, por si só, uma causa ou um diagnóstico.
 
 ## 4. Limitações e recomendação de revisão clínica
-O resultado depende do modelo, dos dados de entrada e do threshold utilizado. A interpretação SHAP explica como as variáveis influenciaram a previsão, mas não estabelece causalidade nem substitui a avaliação clínica.
 
-Recomenda-se que o resultado seja revisto por um profissional de saúde e considerado em conjunto com os demais dados e exames pertinentes."
+Este resultado é uma estimativa de um modelo e não substitui a avaliação de um profissional de saúde. A interpretação não permite confirmar ou excluir câncer e deve ser considerada junto aos demais dados clínicos e exames pertinentes. Recomenda-se discutir o resultado com um profissional de saúde, que poderá avaliar o contexto completo."
 Baixa probabilidade,91,7.224478417139761e-05,0.34000000000000014,Benigno,Benigno,"## 1. Resumo do resultado
-O modelo estimou uma probabilidade de malignidade de **0,01%**. Como esse valor está abaixo do threshold utilizado (**0,34**), a classificação fornecida pelo modelo é **Benigno**.
+
+O modelo estimou uma probabilidade de malignidade de **0,01%**. Como esse valor está abaixo do threshold utilizado (**0,34**, ou 34%), a classificação fornecida pelo modelo foi **Benigno**.
 
 ## 2. Principais fatores que influenciaram a previsão
-Os fatores listados apresentaram valores SHAP negativos, indicando que, nesta previsão, contribuíram para reduzir a tendência do modelo para malignidade:
+
+Os fatores abaixo foram identificados pelo SHAP como contribuições que **reduziram a tendência da previsão para malignidade**:
 
 - **fractal_dimension_se** — valor: 0,0219; SHAP: −1,7734
 - **texture_worst** — valor: 15,6700; SHAP: −1,1013
@@ -55,7 +50,9 @@ Os fatores listados apresentaram valores SHAP negativos, indicando que, nesta pr
 - **fractal_dimension_mean** — valor: 0,0898; SHAP: −0,7155
 
 ## 3. Interpretação do resultado
-Segundo o modelo, os dados analisados favoreceram a classificação **Benigno**, com probabilidade estimada abaixo do threshold. Os valores SHAP explicam a contribuição dessas variáveis para a previsão do modelo; não estabelecem, por si só, o significado clínico dos achados.
+
+Segundo o modelo, os dados apresentados favoreceram a classificação **Benigno**, com probabilidade estimada de malignidade abaixo do threshold definido. Os valores SHAP indicam a direção da contribuição dessas variáveis para a previsão do modelo; não representam, por si só, causas clínicas nem garantem um resultado.
 
 ## 4. Limitações e recomendação de revisão clínica
-Este resultado é apenas um **apoio à decisão** e não substitui diagnóstico ou avaliação de um profissional de saúde. Modelos podem apresentar limitações e erros. A interpretação deve ser revisada por um profissional, considerando os exames e demais informações clínicas pertinentes."
+
+Este resultado é uma estimativa de um modelo de Machine Learning e **não constitui diagnóstico**. Ele não substitui a avaliação de um profissional de saúde, nem a análise dos exames e do contexto clínico. A interpretação e as decisões sobre o caso devem ser revisadas por um profissional qualificado."

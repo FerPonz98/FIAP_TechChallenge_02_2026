@@ -1,0 +1,9 @@
+caso,versao,probabilidade_correta,classificacao_correta,threshold_citado,fatores_citados,secoes_completas,recomenda_revisao,sem_linguagem_de_certeza,score_automatico,sinaliza_incerteza
+Alta probabilidade,v1,True,True,True,1.0,True,True,True,1.0,
+Alta probabilidade,v2,True,True,True,1.0,True,True,True,1.0,
+Próximo ao threshold,v1,True,True,True,1.0,True,True,True,0.875,False
+Próximo ao threshold,v2,True,True,True,1.0,True,True,True,1.0,True
+Baixa probabilidade,v1,True,True,True,1.0,True,True,True,1.0,
+Baixa probabilidade,v2,True,True,True,1.0,True,True,True,1.0,
+Falso negativo,v1,True,True,True,1.0,True,True,True,1.0,
+Falso negativo,v2,True,True,True,1.0,True,True,True,1.0,
