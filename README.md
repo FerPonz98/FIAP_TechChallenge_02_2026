@@ -151,12 +151,19 @@ FIAP_TechChallenge_02_2026/
 │   ├── resultado_final_ga.json
 │   ├── threshold_otimizado.json
 │   ├── importancia_variaveis_shap.csv
-│   └── avaliacao_qualidade_llm.csv
+│   ├── analise_threshold_030.csv
+│   ├── comparacao_shap_fase1_vs_ga.csv
+│   ├── avaliacao_qualidade_llm.csv
+│   ├── avaliacao_automatica_llm.csv
+│   ├── avaliacao_llm_juiz.csv
+│   └── comparacao_prompts_v1_v2.csv
 │
-├── tests/
+├── tests/                      # testes automatizados (pytest)
 │   ├── test_api.py
 │   ├── test_prediction_service.py
-│   ├── test_explainability_service.py
+│   └── test_explainability_service.py
+│
+├── scripts/                    # execução manual (exigem a API rodando)
 │   ├── test_predict_manual.py
 │   ├── test_interpret_manual.py
 │   └── load_test.py
@@ -166,13 +173,14 @@ FIAP_TechChallenge_02_2026/
 │   └── evidencias/
 │       ├── 01_hpa_escalado_replicas.png
 │       ├── 02_kubernetes_criacao_pods.png
-│       └── 03_resultado_test_carga.png
+│       └── 03_resultado_teste_carga.png
 │
 ├── k8s/
 │   ├── deployment.yaml
 │   ├── service.yaml
 │   ├── hpa.yaml
-│   └── secret.example.yaml
+│   ├── secret.example.yaml
+│   └── metrics-server-patch.yaml   # somente ambiente local
 │
 ├── logs/
 │
@@ -222,6 +230,7 @@ São implementados:
 - evolução por gerações;
 - cache de avaliações;
 - três experimentos;
+- análise da geração em que cada experimento atingiu o ótimo;
 - comparação com o modelo da Fase 1.
 
 ---
@@ -235,8 +244,11 @@ Responsável por:
 - seleção através de F2-score;
 - comparação entre thresholds;
 - avaliação final no conjunto de teste;
+- análise do threshold 0,30 recomendado na avaliação da Fase 1;
 - explicabilidade global com SHAP;
-- explicabilidade individual com SHAP.
+- explicabilidade individual com SHAP;
+- análise SHAP do falso negativo restante;
+- consistência do SHAP entre o modelo da Fase 1 e o modelo otimizado.
 
 ---
 
@@ -249,7 +261,9 @@ Responsável por:
 - prompt engineering;
 - geração de explicações;
 - avaliação em diferentes cenários;
-- avaliação da qualidade das interpretações.
+- prompt v2 com zona de incerteza, percentis e pontos de atenção;
+- avaliação manual, automática e por LLM (LLM-as-a-judge);
+- comparação entre as versões v1 e v2 do prompt.
 
 ---
 
@@ -473,7 +487,20 @@ A redução do threshold não reduziu a quantidade de falsos negativos no conjun
 
 Portanto, o experimento demonstra que a seleção de threshold precisa ser validada em dados não utilizados durante sua otimização.
 
-Para este conjunto de teste, `0,50` apresentou melhor equilíbrio global.
+**Decisão:** a API mantém o threshold `0,34`. Ele foi escolhido antes de observar o conjunto de teste, e trocá-lo por `0,50` com base no resultado do teste transformaria o teste em dado de validação (vazamento). O resultado do teste é registrado de forma transparente como limitação.
+
+O threshold fica em `results/threshold_otimizado.json` e pode ser alterado sem retreinar o modelo.
+
+### Recomendação da avaliação da Fase 1: threshold 0,30
+
+| Modelo | Threshold | FN | FP |
+|---|---:|---:|---:|
+| Fase 1 (GridSearchCV) | 0,50 | 2 | 1 |
+| Fase 1 (GridSearchCV) | 0,30 | 2 | 2 |
+| Fase 2 (Algoritmo Genético) | 0,50 | 1 | 0 |
+| Fase 2 (Algoritmo Genético) | 0,30 | 1 | 5 |
+
+Com `0,30` os falsos negativos **não foram eliminados** em nenhum dos modelos. A redução de falsos negativos (2 → 1) veio da otimização com Algoritmo Genético. Zerar os falsos negativos do modelo otimizado exigiria um threshold ≤ 0,22 (7 falsos positivos), valor encontrado observando o próprio teste e, por isso, não adotado.
 
 ---
 
@@ -521,11 +548,13 @@ Exemplo:
 }
 ```
 
-Valores positivos aumentam a saída do modelo em direção à classe maligna.
+Os valores SHAP estão em escala de **log-odds**. Valores positivos aumentam a saída do modelo em direção à classe maligna.
 
 Valores negativos reduzem essa tendência.
 
 As contribuições SHAP representam o comportamento matemático do modelo e não causalidade clínica.
+
+O notebook 03 também mostra que 8 das 10 variáveis mais importantes são as mesmas no modelo da Fase 1 e no modelo otimizado (correlação de Spearman 0,70), e analisa com SHAP o único falso negativo restante: um tumor maligno com textura baixa (percentil ~21), atípico para o modelo.
 
 ---
 
@@ -581,13 +610,19 @@ O prompt estabelece regras explícitas:
 - destacar limitações;
 - recomendar revisão por profissional de saúde.
 
-Formato solicitado:
+O prompt evoluiu em duas versões:
+
+- **v1:** papel definido, regras explícitas, contexto estruturado e saída em quatro seções;
+- **v2 (usada na API):** acrescenta a zona de decisão (alerta quando a probabilidade está a menos de 10 p.p. do threshold), o percentil de cada fator em relação ao treino, o desempenho do modelo no teste, um campo de observações clínicas em texto (base para o Módulo 3) e a seção de pontos de atenção.
+
+Formato da v2:
 
 ```text
 1. Resumo do resultado
-2. Principais fatores
-3. Interpretação
-4. Limitações e recomendação de revisão clínica
+2. Principais fatores que influenciaram a previsão
+3. Interpretação do resultado
+4. Pontos de atenção para o profissional de saúde
+5. Limitações e recomendação de revisão clínica
 ```
 
 A classe real não é enviada para a LLM.
@@ -596,13 +631,22 @@ A classe real não é enviada para a LLM.
 
 # 13. Avaliação da LLM
 
-Foram avaliados três tipos de casos:
+Casos avaliados:
 
 - alta probabilidade;
-- próximo ao threshold;
-- baixa probabilidade.
+- próximo ao threshold (falso positivo do modelo);
+- baixa probabilidade;
+- falso negativo do modelo.
 
-Resultados registrados:
+A qualidade foi avaliada de três formas complementares:
+
+1. **Manual:** notas de 1 a 5 atribuídas pelo grupo (prompt v1);
+2. **Automática:** verificações objetivas (probabilidade, classificação e threshold corretos, fatores citados, seções completas, recomendação de revisão clínica, ausência de linguagem de certeza e sinalização da zona de incerteza);
+3. **LLM-as-a-judge:** uma segunda chamada à LLM avalia cada resposta com uma rubrica (fidelidade, clareza, segurança, completude e acionabilidade).
+
+<!-- PREENCHER: tabela de results/comparacao_prompts_v1_v2.csv (score automático e média do juiz por versão) -->
+
+Avaliação manual (prompt v1):
 
 | Caso                 | Fidelidade | Clareza | Segurança | Completude | Média |
 | -------------------- | ---------: | ------: | --------: | ---------: | ----: |
@@ -627,6 +671,8 @@ A resposta não deve apresentar a previsão como diagnóstico definitivo.
 ### Completude
 
 A explicação deve apresentar resultado, fatores, interpretação e limitações.
+
+As notas manuais foram atribuídas pelo próprio grupo; por isso foram complementadas pelas avaliações automática e por LLM.
 
 ---
 
@@ -701,6 +747,8 @@ e retorna:
 - principais fatores SHAP;
 - interpretação da LLM.
 
+Se a LLM estiver indisponível (falha, timeout ou chave não configurada), o endpoint continua respondendo `200` com a predição e os fatores SHAP, `explicacao_llm: null` e um campo `aviso`. A chamada à LLM usa timeout de 60 segundos e até 2 novas tentativas.
+
 ---
 
 ## `GET /metrics`
@@ -739,6 +787,8 @@ Tempo=0.0152s
 
 Informações sensíveis, como a chave da OpenAI, não são registradas.
 
+Os dados clínicos do paciente (as 30 variáveis) também não são registrados; apenas a classificação e a probabilidade.
+
 ---
 
 # 16. Métricas da Aplicação
@@ -768,36 +818,14 @@ A API apenas disponibiliza as métricas para permitir coleta futura por Promethe
 
 A solução utiliza Docker para garantir um ambiente reproduzível.
 
-Serviços disponíveis no `docker-compose.yml`:
+Serviços do `docker-compose.yml`:
 
 ```text
-api
-jupyter
-postgres
-n8n
+api      → localhost:8000
+jupyter  → localhost:8888
 ```
 
-Serviços principais:
-
-```text
-FastAPI  → localhost:8000
-Jupyter  → localhost:8888
-n8n      → localhost:5678
-```
-
-PostgreSQL utiliza uma porta externa configurável e continua utilizando `5432` internamente na rede Docker.
-
-### Serviços auxiliares
-
-Na implementação atual, PostgreSQL e n8n não fazem parte do fluxo obrigatório de inferência.
-
-Foram mantidos no ambiente como base para futuras extensões:
-
-- persistência de previsões;
-- auditoria;
-- workflows;
-- automações;
-- integrações externas.
+Os dois serviços usam a mesma imagem, garantindo que os notebooks e a API utilizem as mesmas dependências.
 
 ---
 
@@ -820,17 +848,13 @@ cp .env.example .env
 Configuração:
 
 ```env
-POSTGRES_USER=fiap
-POSTGRES_PASSWORD=fiap123
-POSTGRES_DB=techchallenge
-
-DATABASE_URL=postgresql://fiap:fiap123@postgres:5432/techchallenge
-
 OPENAI_API_KEY=
 LLM_MODEL=
 
 TZ=America/La_Paz
 ```
+
+Sem `OPENAI_API_KEY`, a API inicia normalmente: `/predict` funciona e `/interpret` responde sem a explicação da LLM.
 
 Nunca envie a chave da OpenAI para o repositório.
 
@@ -898,6 +922,29 @@ Ordem recomendada:
 
 ---
 
+## 19.5 Executar sem Docker (ambiente virtual)
+
+```bash
+python -m venv .venv
+```
+
+```powershell
+.venv\Scripts\activate          # Windows
+```
+
+```bash
+source .venv/bin/activate        # Linux/macOS
+```
+
+```bash
+pip install -r requirements.txt
+uvicorn api.main:app --reload
+```
+
+Os notebooks utilizam caminhos `/app/...` e devem ser executados no container `jupyter`.
+
+---
+
 # 20. Testes
 
 Os testes utilizam `pytest`.
@@ -920,7 +967,11 @@ A suíte cobre:
 - estrutura dos fatores;
 - endpoint `/predict`;
 - endpoint `/interpret`;
+- endpoint `/interpret` com a LLM indisponível;
+- variável ausente em `/predict` (erro 400);
 - endpoint `/metrics`.
+
+Resultado atual: **15 testes aprovados**.
 
 Nas chamadas automatizadas do `/interpret`, a integração com a LLM utiliza `mock`.
 
@@ -930,7 +981,12 @@ Isso evita:
 - dependência externa;
 - instabilidade dos testes.
 
-Chamadas reais à LLM foram testadas separadamente.
+Chamadas reais à LLM foram testadas separadamente com os scripts manuais (exigem a API em execução):
+
+```bash
+python scripts/test_predict_manual.py
+python scripts/test_interpret_manual.py
+```
 
 ---
 
@@ -945,6 +1001,7 @@ k8s/deployment.yaml
 k8s/service.yaml
 k8s/hpa.yaml
 k8s/secret.example.yaml
+k8s/metrics-server-patch.yaml
 ```
 
 ---
@@ -1001,6 +1058,8 @@ resources:
 ```
 
 O `cpu.requests` é utilizado pelo HPA como referência para calcular a utilização percentual de CPU.
+
+As probes `readiness` e `liveness` usam `/health` com `timeoutSeconds: 5` e `failureThreshold: 3`. Com o valor padrão (1 segundo), sob CPU saturada o Kubernetes reiniciava pods durante o teste de carga.
 
 ---
 
@@ -1132,19 +1191,23 @@ Duração: 120 segundos
 Workers simultâneos: 50
 ```
 
-Resultado:
+Resultado final (após o ajuste das probes):
+
+```text
+Total de requisições: 26.150
+Respostas HTTP 200: 16.017
+Taxa de sucesso: 61,25%
+```
+
+Execução anterior, com o timeout padrão das probes (1 s):
 
 ```text
 Total de requisições: 42.100
 Respostas HTTP 200: 16.099
-Outros erros/timeouts: 26.001
+Taxa de sucesso: 38,24%
 ```
 
-Taxa de sucesso:
-
-```text
-38,24%
-```
+O ajuste do `timeoutSeconds` das probes aumentou a taxa de sucesso de 38% para 61%. As falhas restantes ocorrem principalmente enquanto os novos pods ainda estão sendo criados.
 
 A carga foi deliberadamente agressiva.
 
@@ -1160,8 +1223,9 @@ Pods = 1
 Durante o stress:
 
 ```text
-390% / 60%
-426% / 60%
+500% / 60%  → 1 réplica
+473% / 60%  → 2 réplicas
+             → 4 réplicas
 ```
 
 O HPA respondeu:
@@ -1181,8 +1245,12 @@ Pending
 ↓
 ContainerCreating
 ↓
-Running
+Running (0/1, carregando o modelo)
+↓
+Running (1/1, pronto), em cerca de 20 segundos
 ```
+
+Este é um teste de estresse para validar o HPA, e não um benchmark de desempenho.
 
 Isso demonstra a escalabilidade automática funcionando na prática.
 
@@ -1204,7 +1272,7 @@ Isso demonstra a escalabilidade automática funcionando na prática.
 
 ## Resultado do stress test
 
-![Resultado do teste de carga](docs/evidencias/03_resultado_test_carga.png)
+![Resultado do teste de carga](docs/evidencias/03_resultado_teste_carga.png)
 
 ---
 
@@ -1282,7 +1350,8 @@ Ela documenta:
 - [x] Kubernetes;
 - [x] Metrics Server;
 - [x] Horizontal Pod Autoscaler;
-- [x] escalabilidade automática validada através de stress test.
+- [x] escalabilidade automática validada através de stress test;
+- [x] testes automatizados (15 aprovados).
 
 ---
 
@@ -1293,8 +1362,8 @@ Ela documenta:
 - [x] interpretação de dados numéricos;
 - [x] integração com fatores SHAP;
 - [x] prompt engineering;
-- [x] avaliação das interpretações;
-- [x] estrutura preparada para futura integração com dados textuais.
+- [x] avaliação das interpretações (manual, automática e por LLM);
+- [x] estrutura preparada para futura integração com dados textuais (campo de observações clínicas no prompt v2).
 
 ---
 
@@ -1312,7 +1381,6 @@ Ela documenta:
 - Prometheus Client
 - Docker
 - Docker Compose
-- PostgreSQL
 - Jupyter Notebook
 - Kubernetes
 - Metrics Server
@@ -1366,7 +1434,7 @@ Possíveis evoluções:
 - autenticação da API;
 - histórico de previsões;
 - auditoria;
-- persistência em PostgreSQL;
+- persistência do histórico de previsões em banco de dados;
 - dashboards;
 - benchmark com p50, p95 e p99;
 - testes de carga mais controlados;
@@ -1406,7 +1474,7 @@ Falsos positivos:
 
 Os três experimentos do Algoritmo Genético convergiram para a mesma configuração ótima.
 
-A análise de threshold também mostrou um resultado relevante: o threshold `0,34`, embora selecionado por F2-score em validação, não superou o threshold padrão `0,50` no conjunto de teste.
+A análise de threshold também mostrou um resultado relevante: o threshold `0,34`, embora selecionado por F2-score em validação, não superou o threshold padrão `0,50` no conjunto de teste. A redução para `0,30`, recomendada na avaliação da Fase 1, também não eliminou os falsos negativos; o ganho de sensibilidade veio da otimização com Algoritmo Genético.
 
 A explicabilidade com SHAP permitiu identificar os principais fatores envolvidos em cada previsão.
 
