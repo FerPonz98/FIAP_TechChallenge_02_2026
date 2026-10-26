@@ -191,7 +191,16 @@ Casos avaliados: alta probabilidade, próximo ao threshold (falso positivo), bai
 | Automática     | Probabilidade/classificação corretas, fatores citados, seções, recomendação de revisão, ausência de linguagem de certeza, sinalização de incerteza |
 | LLM-as-a-judge | Rubrica de 1 a 5, incluindo acionabilidade                                                                                                         |
 
-<!-- PREENCHER: tabela de results/comparacao_prompts_v1_v2.csv -->
+Resultado médio dos 4 casos (`results/comparacao_prompts_v1_v2.csv`):
+
+| Versão | Score automático | Fidelidade |  Clareza | Segurança | Completude | Acionabilidade | Média do juiz |
+| ------ | ---------------: | ---------: | -------: | --------: | ---------: | -------------: | ------------: |
+| v1     |             0,97 |   **5,00** |     4,25 |      5,00 |   **5,00** |           2,25 |      **4,30** |
+| v2     |         **1,00** |       2,50 | **4,50** |      5,00 |       4,75 |       **3,25** |          4,00 |
+
+- A v2 acertou todas as verificações automáticas e foi a única a sinalizar a zona de incerteza no caso próximo ao threshold.
+- Acionabilidade subiu de 2,25 para 3,25 e clareza de 4,25 para 4,50.
+- A queda de fidelidade da v2 no juiz é um viés do avaliador: ele não recebeu o mesmo contexto da v2 (métricas do teste, zona de incerteza) e penalizou informações corretas. Análise completa em `docs/arquitetura.md`.
 
 Detalhes em [`docs/arquitetura.md`](docs/arquitetura.md#10-avaliação-das-interpretações-da-llm).
 

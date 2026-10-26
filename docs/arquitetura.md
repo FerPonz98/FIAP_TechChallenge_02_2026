@@ -21,14 +21,14 @@ A arquitetura foi organizada para separar treinamento, inferência, explicabilid
 ### Resumo dos resultados
 
 | Indicador (conjunto de teste, 114 casos) | Fase 1 (GridSearchCV) | Fase 2 (Algoritmo Genético) |
-|---|---|---|
-| Accuracy | 0,9737 | **0,9912** |
-| Precision | 0,9756 | **1,0000** |
-| Recall | 0,9524 | **0,9762** |
-| F1-score | 0,9639 | **0,9880** |
-| ROC-AUC | 0,9954 | **0,9977** |
-| Falsos negativos | 2 | **1** |
-| Falsos positivos | 1 | **0** |
+| ---------------------------------------- | --------------------- | --------------------------- |
+| Accuracy                                 | 0,9737                | **0,9912**                  |
+| Precision                                | 0,9756                | **1,0000**                  |
+| Recall                                   | 0,9524                | **0,9762**                  |
+| F1-score                                 | 0,9639                | **0,9880**                  |
+| ROC-AUC                                  | 0,9954                | **0,9977**                  |
+| Falsos negativos                         | 2                     | **1**                       |
+| Falsos positivos                         | 1                     | **0**                       |
 
 ---
 
@@ -186,7 +186,7 @@ O modelo é um `Pipeline` do scikit-learn:
 StandardScaler  →  LogisticRegression
 ```
 
-A padronização faz parte do pipeline, de modo que, na validação cruzada, o scaler é ajustado apenas nos folds de treino, evitando vazamento de dados (*data leakage*).
+A padronização faz parte do pipeline, de modo que, na validação cruzada, o scaler é ajustado apenas nos folds de treino, evitando vazamento de dados (_data leakage_).
 
 ---
 
@@ -200,11 +200,11 @@ Cada indivíduo representa uma configuração de hiperparâmetros da Regressão 
 
 O cromossomo possui **3 genes inteiros**, cada um sendo um índice para uma lista de valores possíveis:
 
-| Gene | Hiperparâmetro | Valores possíveis |
-|---|---|---|
-| 0 | `C` | 0,001 · 0,01 · 0,1 · 0,5 · 1 · 2 · 5 · 10 · 100 |
-| 1 | `class_weight` | `None` · `balanced` |
-| 2 | par `solver/penalty` | liblinear/l1 · liblinear/l2 · saga/l1 · saga/l2 · lbfgs/l2 |
+| Gene | Hiperparâmetro       | Valores possíveis                                          |
+| ---- | -------------------- | ---------------------------------------------------------- |
+| 0    | `C`                  | 0,001 · 0,01 · 0,1 · 0,5 · 1 · 2 · 5 · 10 · 100            |
+| 1    | `class_weight`       | `None` · `balanced`                                        |
+| 2    | par `solver/penalty` | liblinear/l1 · liblinear/l2 · saga/l1 · saga/l2 · lbfgs/l2 |
 
 `solver` e `penalty` foram agrupados em um único gene porque nem toda combinação é válida no scikit-learn (por exemplo, `lbfgs` não suporta `l1`). Assim, crossover e mutação nunca geram indivíduos inválidos.
 
@@ -225,14 +225,14 @@ O espaço de busca possui 9 × 2 × 5 = **90 combinações**.
 
 ## 5.2 Operadores genéticos
 
-| Operador | Implementação |
-|---|---|
-| População inicial | indivíduos aleatórios |
-| Seleção | roleta (probabilidade proporcional ao fitness) |
-| Crossover | uniforme (cada gene vem de um dos pais com 50% de chance) |
-| Mutação | por gene: com probabilidade = taxa de mutação, o gene recebe outro valor válido |
-| Elitismo | os *k* melhores indivíduos passam direto para a próxima geração |
-| Cache | indivíduos já avaliados não são retreinados |
+| Operador          | Implementação                                                                   |
+| ----------------- | ------------------------------------------------------------------------------- |
+| População inicial | indivíduos aleatórios                                                           |
+| Seleção           | roleta (probabilidade proporcional ao fitness)                                  |
+| Crossover         | uniforme (cada gene vem de um dos pais com 50% de chance)                       |
+| Mutação           | por gene: com probabilidade = taxa de mutação, o gene recebe outro valor válido |
+| Elitismo          | os _k_ melhores indivíduos passam direto para a próxima geração                 |
+| Cache             | indivíduos já avaliados não são retreinados                                     |
 
 ## 5.3 Função fitness
 
@@ -248,11 +248,11 @@ Foi dada maior importância ao Recall devido à natureza do problema de diagnós
 
 Foram realizados três experimentos com diferentes configurações:
 
-| Experimento | População | Gerações | Mutação | Elitismo | Melhor fitness | Recall CV | F1 CV | ROC-AUC CV | Avaliações únicas | Tempo |
-|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 20 | 15 | 0,05 | 2 | 0,9686 | 0,9588 | 0,9674 | 0,9949 | 61 | 8,6 s |
-| 2 | 30 | 20 | 0,10 | 2 | 0,9686 | 0,9588 | 0,9674 | 0,9949 | 79 | 12,4 s |
-| 3 | 40 | 25 | 0,20 | 4 | 0,9686 | 0,9588 | 0,9674 | 0,9949 | 89 | 13,5 s |
+| Experimento | População | Gerações | Mutação | Elitismo | Melhor fitness | Recall CV | F1 CV  | ROC-AUC CV | Avaliações únicas | Tempo  |
+| ----------- | --------- | -------- | ------- | -------- | -------------- | --------- | ------ | ---------- | ----------------- | ------ |
+| 1           | 20        | 15       | 0,05    | 2        | 0,9686         | 0,9588    | 0,9674 | 0,9949     | 61                | 8,6 s  |
+| 2           | 30        | 20       | 0,10    | 2        | 0,9686         | 0,9588    | 0,9674 | 0,9949     | 79                | 12,4 s |
+| 3           | 40        | 25       | 0,20    | 4        | 0,9686         | 0,9588    | 0,9674 | 0,9949     | 89                | 13,5 s |
 
 ![Evolução do fitness por experimento](../results/02_evolucao_fitness_ga.png)
 
@@ -278,9 +278,9 @@ O melhor indivíduo foi selecionado utilizando somente os dados de treinamento e
 
 Resultados no conjunto de teste (threshold padrão 0,50):
 
-| Modelo | Accuracy | Precision | Recall | F1 | ROC-AUC | FN | FP |
-|---|---|---|---|---|---|---|---|
-| GridSearchCV – Fase 1 | 0,9737 | 0,9756 | 0,9524 | 0,9639 | 0,9954 | 2 | 1 |
+| Modelo                      | Accuracy   | Precision  | Recall     | F1         | ROC-AUC    | FN    | FP    |
+| --------------------------- | ---------- | ---------- | ---------- | ---------- | ---------- | ----- | ----- |
+| GridSearchCV – Fase 1       | 0,9737     | 0,9756     | 0,9524     | 0,9639     | 0,9954     | 2     | 1     |
 | Algoritmo Genético – Fase 2 | **0,9912** | **1,0000** | **0,9762** | **0,9880** | **0,9977** | **1** | **0** |
 
 O modelo otimizado reduziu os falsos negativos de 2 para 1 e eliminou o falso positivo.
@@ -295,17 +295,17 @@ Além da otimização dos hiperparâmetros, foi analisado o threshold de classif
 
 ## 6.1 Método de seleção
 
-1. Foram geradas probabilidades *out-of-fold* com `cross_val_predict` (5 folds) **somente sobre o treino**.
+1. Foram geradas probabilidades _out-of-fold_ com `cross_val_predict` (5 folds) **somente sobre o treino**.
 2. Foram avaliados thresholds de 0,20 a 0,60 (passo 0,01).
 3. O critério foi **maximizar o F2-score** (que dá peso duas vezes maior ao Recall do que à Precision), com desempate por Recall e depois por F1.
 
 Threshold selecionado: **0,34**
 
-| Threshold (validação cruzada) | Precision | Recall | F1 | F2 |
-|---|---|---|---|---|
-| 0,30 | 0,9027 | 0,9824 | 0,9408 | 0,9653 |
-| **0,34** | **0,9382** | **0,9824** | **0,9598** | **0,9732** |
-| 0,50 | 0,9760 | 0,9588 | 0,9674 | 0,9622 |
+| Threshold (validação cruzada) | Precision  | Recall     | F1         | F2         |
+| ----------------------------- | ---------- | ---------- | ---------- | ---------- |
+| 0,30                          | 0,9027     | 0,9824     | 0,9408     | 0,9653     |
+| **0,34**                      | **0,9382** | **0,9824** | **0,9598** | **0,9732** |
+| 0,50                          | 0,9760     | 0,9588     | 0,9674     | 0,9622     |
 
 Na validação cruzada, o threshold 0,34 aumentou o Recall de 95,9% para 98,2% (cerca de 4 casos malignos a menos classificados como benignos entre os 170 malignos do treino).
 
@@ -313,10 +313,10 @@ Na validação cruzada, o threshold 0,34 aumentou o Recall de 95,9% para 98,2% (
 
 ## 6.2 Resultado no conjunto de teste
 
-| Threshold | Accuracy | Precision | Recall | F1 | TN | FP | FN | TP |
-|---|---|---|---|---|---|---|---|---|
-| 0,50 | 0,9912 | 1,0000 | 0,9762 | 0,9880 | 72 | 0 | 1 | 41 |
-| 0,34 | 0,9474 | 0,8913 | 0,9762 | 0,9318 | 67 | 5 | 1 | 41 |
+| Threshold | Accuracy | Precision | Recall | F1     | TN  | FP  | FN  | TP  |
+| --------- | -------- | --------- | ------ | ------ | --- | --- | --- | --- |
+| 0,50      | 0,9912   | 1,0000    | 0,9762 | 0,9880 | 72  | 0   | 1   | 41  |
+| 0,34      | 0,9474   | 0,8913    | 0,9762 | 0,9318 | 67  | 5   | 1   | 41  |
 
 No conjunto de teste, o threshold 0,34 **não reduziu** os falsos negativos (1 em ambos) e acrescentou 5 falsos positivos.
 
@@ -344,12 +344,12 @@ Trocar para 0,50 **com base no resultado do teste** seria usar o conjunto de tes
 
 Na avaliação da Fase 1 foi recomendado reduzir o threshold para 0,30 e verificar se os 2 falsos negativos seriam eliminados. A análise (notebook 03) foi feita para os dois modelos, como análise de sensibilidade:
 
-| Modelo | Threshold | Recall | Precision | F1 | FN | FP |
-|---|---|---|---|---|---|---|
-| Fase 1 (GridSearchCV) | 0,50 | 0,9524 | 0,9756 | 0,9639 | 2 | 1 |
-| Fase 1 (GridSearchCV) | 0,30 | 0,9524 | 0,9524 | 0,9524 | 2 | 2 |
-| Fase 2 (Algoritmo Genético) | 0,50 | 0,9762 | 1,0000 | 0,9880 | 1 | 0 |
-| Fase 2 (Algoritmo Genético) | 0,30 | 0,9762 | 0,8913 | 0,9318 | 1 | 5 |
+| Modelo                      | Threshold | Recall | Precision | F1     | FN  | FP  |
+| --------------------------- | --------- | ------ | --------- | ------ | --- | --- |
+| Fase 1 (GridSearchCV)       | 0,50      | 0,9524 | 0,9756    | 0,9639 | 2   | 1   |
+| Fase 1 (GridSearchCV)       | 0,30      | 0,9524 | 0,9524    | 0,9524 | 2   | 2   |
+| Fase 2 (Algoritmo Genético) | 0,50      | 0,9762 | 1,0000    | 0,9880 | 1   | 0   |
+| Fase 2 (Algoritmo Genético) | 0,30      | 0,9762 | 0,8913    | 0,9318 | 1   | 5   |
 
 - Com 0,30, os falsos negativos **não foram eliminados** em nenhum dos modelos.
 - No modelo da Fase 1, um caso maligno recebeu probabilidade de 0,088; zerar os falsos negativos exigiria threshold ≤ 0,088, com 9 falsos positivos.
@@ -367,20 +367,20 @@ Na avaliação da Fase 1 foi recomendado reduzir o threshold para 0,30 e verific
 Foi utilizado **SHAP (SHapley Additive exPlanations)** para aumentar a interpretabilidade das previsões.
 
 - Explainer: `shap.LinearExplainer`, adequado para Regressão Logística;
-- Dados de referência (*background*): conjunto de treino padronizado;
+- Dados de referência (_background_): conjunto de treino padronizado;
 - Os valores SHAP estão na escala de **log-odds**: valores positivos aumentam a tendência para malignidade e negativos a reduzem.
 
 O SHAP é usado em dois níveis:
 
 **Global** — variáveis mais influentes no conjunto de teste (média do |SHAP|):
 
-| # | Variável | Importância média |
-|---|---|---|
-| 1 | texture_worst | 0,544 |
-| 2 | radius_worst | 0,404 |
-| 3 | concave points_worst | 0,362 |
-| 4 | perimeter_worst | 0,358 |
-| 5 | area_worst | 0,353 |
+| #   | Variável             | Importância média |
+| --- | -------------------- | ----------------- |
+| 1   | texture_worst        | 0,544             |
+| 2   | radius_worst         | 0,404             |
+| 3   | concave points_worst | 0,362             |
+| 4   | perimeter_worst      | 0,358             |
+| 5   | area_worst           | 0,353             |
 
 **Individual** — para cada paciente, são selecionados os cinco fatores com maior valor absoluto de contribuição SHAP. Cada fator retorna:
 
@@ -490,12 +490,12 @@ A classe real do paciente **não** é enviada ao prompt; ela é usada apenas na 
 
 Foram selecionados quatro casos do conjunto de teste com perfis diferentes:
 
-| Caso | Probabilidade | Classificação do modelo | Classe real |
-|---|---|---|---|
-| Alta probabilidade | >99,9% | Maligno | Maligno |
-| Próximo ao threshold | 34,94% | Maligno | Benigno (falso positivo) |
-| Baixa probabilidade | 0,01% | Benigno | Benigno |
-| Falso negativo | 22,37% | Benigno | Maligno (falso negativo) |
+| Caso                 | Probabilidade | Classificação do modelo | Classe real              |
+| -------------------- | ------------- | ----------------------- | ------------------------ |
+| Alta probabilidade   | >99,9%        | Maligno                 | Maligno                  |
+| Próximo ao threshold | 34,94%        | Maligno                 | Benigno (falso positivo) |
+| Baixa probabilidade  | 0,01%         | Benigno                 | Benigno                  |
+| Falso negativo       | 22,37%        | Benigno                 | Maligno (falso negativo) |
 
 Os dois erros do modelo foram incluídos para observar se a LLM mantém a cautela quando o modelo erra.
 
@@ -510,11 +510,11 @@ Critérios (escala de 1 a 5):
 - **Segurança:** não apresenta a classificação como diagnóstico definitivo;
 - **Completude:** contém resultado, fatores, interpretação e limitações.
 
-| Caso | Fidelidade | Clareza | Segurança | Completude | Média |
-|---|---|---|---|---|---|
-| Alta probabilidade | 5 | 5 | 5 | 5 | 5,0 |
-| Próximo ao threshold | 5 | 5 | 5 | 5 | 5,0 |
-| Baixa probabilidade | 5 | 5 | 5 | 5 | 5,0 |
+| Caso                 | Fidelidade | Clareza | Segurança | Completude | Média |
+| -------------------- | ---------- | ------- | --------- | ---------- | ----- |
+| Alta probabilidade   | 5          | 5       | 5         | 5          | 5,0   |
+| Próximo ao threshold | 5          | 5       | 5         | 5          | 5,0   |
+| Baixa probabilidade  | 5          | 5       | 5         | 5          | 5,0   |
 
 As notas foram atribuídas manualmente pelo grupo após a leitura das respostas, registradas em `results/avaliacao_casos_llm.json`. Por serem atribuídas pelos próprios autores, foram complementadas pelas avaliações a seguir.
 
@@ -536,13 +536,18 @@ Uma segunda chamada à LLM recebe os dados reais do modelo, a resposta e uma rub
 
 ## 10.4 Resultado v1 × v2
 
-<!-- PREENCHER com results/comparacao_prompts_v1_v2.csv:
+Média dos 4 casos (`results/comparacao_prompts_v1_v2.csv`):
 
-| Versão | Score automático | Fidelidade | Clareza | Segurança | Completude | Acionabilidade | Média do juiz |
-|---|---|---|---|---|---|---|---|
-| v1 | | | | | | | |
-| v2 | | | | | | | |
--->
+| Versão | Score automático | Fidelidade |  Clareza | Segurança | Completude | Acionabilidade | Média do juiz |
+| ------ | ---------------: | ---------: | -------: | --------: | ---------: | -------------: | ------------: |
+| v1     |             0,97 |   **5,00** |     4,25 |      5,00 |   **5,00** |           2,25 |      **4,30** |
+| v2     |         **1,00** |       2,50 | **4,50** |      5,00 |       4,75 |       **3,25** |          4,00 |
+
+- **Avaliação automática:** a v2 acertou 100% das verificações. A única falha da v1 foi no caso próximo ao threshold (falso positivo), em que não sinalizou que a probabilidade (34,94%) estava a menos de 1 ponto percentual do limite; a v2 sinalizou.
+- **Acionabilidade:** subiu de 2,25 para 3,25, porque a v2 contextualiza os fatores com percentis e indica a margem até o threshold. Clareza também melhorou (4,25 → 4,50). Segurança ficou em 5,0 nas duas versões.
+- **Fidelidade (5,00 → 2,50): limitação do avaliador, não alucinação.** As justificativas do juiz penalizam a v2 por citar as métricas do teste, a zona de incerteza e a escala log-odds "sem suporte nos dados". Essas informações estavam no prompt da v2, mas o prompt do juiz recebe apenas probabilidade, threshold, classificação e fatores. A verificação automática confirma que os números da v2 estão corretos.
+- **O que a v2 ainda não resolveu:** o juiz considera a seção "Pontos de atenção" genérica, pois repete as métricas do modelo em vez de apontar o que revisar no caso. É o próximo ponto de melhoria do prompt.
+- **Lição:** em LLM-as-a-judge, o avaliador precisa receber o mesmo contexto que o gerador; caso contrário, penaliza informações corretas. Como a média do juiz (4,30 → 4,00) é afetada por esse viés, a comparação considera os três métodos em conjunto.
 
 ---
 
@@ -550,14 +555,14 @@ Uma segunda chamada à LLM recebe os dados reais do modelo, a resposta e uma rub
 
 A solução é disponibilizada através de **FastAPI**, com documentação automática (Swagger) em `/docs`.
 
-| Método | Rota | Descrição |
-|---|---|---|
-| GET | `/` | Verifica se a aplicação está online |
-| GET | `/health` | Health check usado pelas probes do Kubernetes |
-| GET | `/features` | Lista as 30 variáveis esperadas pelo modelo |
-| POST | `/predict` | Probabilidade, threshold e classificação |
-| POST | `/interpret` | Predição + SHAP + explicação da LLM (com fallback se a LLM falhar) |
-| GET | `/metrics` | Métricas no formato Prometheus |
+| Método | Rota         | Descrição                                                          |
+| ------ | ------------ | ------------------------------------------------------------------ |
+| GET    | `/`          | Verifica se a aplicação está online                                |
+| GET    | `/health`    | Health check usado pelas probes do Kubernetes                      |
+| GET    | `/features`  | Lista as 30 variáveis esperadas pelo modelo                        |
+| POST   | `/predict`   | Probabilidade, threshold e classificação                           |
+| POST   | `/interpret` | Predição + SHAP + explicação da LLM (com fallback se a LLM falhar) |
+| GET    | `/metrics`   | Métricas no formato Prometheus                                     |
 
 Exemplo de `/health`:
 
@@ -602,10 +607,10 @@ O sistema não registra informações sensíveis: nem a chave da API da OpenAI, 
 
 A API expõe métricas no formato Prometheus em `GET /metrics`:
 
-| Métrica | Tipo de informação |
-|---|---|
-| `api_requisicoes_total` | quantidade de requisições |
-| `api_tempo_requisicao_segundos` | tempo de processamento |
+| Métrica                         | Tipo de informação        |
+| ------------------------------- | ------------------------- |
+| `api_requisicoes_total`         | quantidade de requisições |
+| `api_tempo_requisicao_segundos` | tempo de processamento    |
 
 Nesta fase, as métricas são expostas pela API; a coleta por um servidor Prometheus e a visualização em Grafana estão previstas como evolução futura.
 
@@ -615,10 +620,10 @@ Nesta fase, as métricas são expostas pela API; a coleta por um servidor Promet
 
 A aplicação utiliza Docker para garantir um ambiente reproduzível.
 
-| Serviço (`docker-compose.yml`) | Porta | Função |
-|---|---|---|
-| `api` | 8000 | API FastAPI |
-| `jupyter` | 8888 | Execução dos notebooks com as mesmas dependências da API |
+| Serviço (`docker-compose.yml`) | Porta | Função                                                   |
+| ------------------------------ | ----- | -------------------------------------------------------- |
+| `api`                          | 8000  | API FastAPI                                              |
+| `jupyter`                      | 8888  | Execução dos notebooks com as mesmas dependências da API |
 
 Serviços auxiliares adicionados no início do projeto (PostgreSQL e n8n) foram removidos por não participarem de nenhum fluxo da solução.
 
@@ -639,12 +644,12 @@ Os notebooks utilizam caminhos `/app/...` e devem ser executados no container `j
 
 Kubernetes foi utilizado para demonstrar a escalabilidade automática exigida pelo projeto.
 
-| Recurso | Função |
-|---|---|
-| Deployment | Executa os pods da API: `requests` 100m CPU / 256Mi, `limits` 500m CPU / 512Mi; probes de readiness e liveness em `/health` com `timeoutSeconds: 5` e `failureThreshold: 3` |
-| Service | Tipo `LoadBalancer`; no Docker Desktop a API fica em `http://localhost:8000` |
-| HorizontalPodAutoscaler | Escala os pods com base na CPU |
-| Secret | Armazena `OPENAI_API_KEY` e `LLM_MODEL` |
+| Recurso                 | Função                                                                                                                                                                      |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Deployment              | Executa os pods da API: `requests` 100m CPU / 256Mi, `limits` 500m CPU / 512Mi; probes de readiness e liveness em `/health` com `timeoutSeconds: 5` e `failureThreshold: 3` |
+| Service                 | Tipo `LoadBalancer`; no Docker Desktop a API fica em `http://localhost:8000`                                                                                                |
+| HorizontalPodAutoscaler | Escala os pods com base na CPU                                                                                                                                              |
+| Secret                  | Armazena `OPENAI_API_KEY` e `LLM_MODEL`                                                                                                                                     |
 
 O repositório contém apenas `secret.example.yaml`; o arquivo com valores reais não é versionado.
 
@@ -696,23 +701,23 @@ CPU: 252m | CPU%: 1% | Memória: 2872Mi | Memória%: 18%
 
 Foi realizado um teste de carga (`scripts/load_test.py`) contra `POST /predict`. O `/interpret` não foi utilizado para não consumir créditos da OpenAI.
 
-| Parâmetro | Execução 1 (probes padrão) | Execução final (probes ajustadas) |
-|---|---|---|
-| Trabalhadores simultâneos | 50 | 50 |
-| Duração | 120 s | 120 s |
-| Requisições enviadas | 42.100 | 26.150 |
-| Respostas HTTP 200 | 16.099 (38,2%) | 16.017 (61,3%) |
+| Parâmetro                 | Execução 1 (probes padrão) | Execução final (probes ajustadas) |
+| ------------------------- | -------------------------- | --------------------------------- |
+| Trabalhadores simultâneos | 50                         | 50                                |
+| Duração                   | 120 s                      | 120 s                             |
+| Requisições enviadas      | 42.100                     | 26.150                            |
+| Respostas HTTP 200        | 16.099 (38,2%)             | 16.017 (61,3%)                    |
 
 Na primeira execução, com o timeout padrão das probes (1 segundo), o `/health` demorava mais que isso com a CPU saturada e o Kubernetes reiniciava pods. Com `timeoutSeconds: 5` a taxa de sucesso subiu de 38% para 61%. As falhas restantes ocorrem principalmente enquanto os novos pods ainda estão sendo criados.
 
 Comportamento observado na execução final:
 
-| Momento | CPU / meta | Réplicas |
-|---|---|---|
-| Antes do teste | 2% / 60% | 1 |
-| Início da carga | 500% / 60% | 1 |
-| HPA reage | 473% / 60% | 2 |
-| Escala final | — | 4 |
+| Momento         | CPU / meta | Réplicas |
+| --------------- | ---------- | -------- |
+| Antes do teste  | 2% / 60%   | 1        |
+| Início da carga | 500% / 60% | 1        |
+| HPA reage       | 473% / 60% | 2        |
+| Escala final    | —          | 4        |
 
 Os novos pods ficaram prontos (1/1) em cerca de 20 segundos. O Kubernetes aumentou automaticamente as réplicas de 1 para 4.
 
@@ -779,21 +784,21 @@ Para Kubernetes, os valores sensíveis são armazenados em `Secret`.
 
 # 22. Decisões de Implementação
 
-| Decisão | Motivo |
-|---|---|
-| Regressão Logística como modelo principal | Bom desempenho, treinamento rápido, probabilidades calibráveis, compatibilidade com SHAP e interpretabilidade superior a modelos mais complexos |
-| Algoritmo Genético implementado manualmente | Atende diretamente ao requisito e permite controlar cada operador |
-| `solver` e `penalty` em um único gene | Impede combinações inválidas durante crossover e mutação |
-| Recall com peso 50% no fitness | Reduzir falsos negativos é prioritário em diagnóstico |
-| Cache de fitness | Evita retreinar indivíduos repetidos e reduz o tempo de execução |
-| Threshold escolhido por F2 em dados *out-of-fold* | Prioriza sensibilidade sem utilizar o conjunto de teste |
-| Threshold fora do modelo | Permite ajuste sem novo treinamento |
-| SHAP (`LinearExplainer`) | Explicabilidade global e individual exata para modelos lineares |
-| LLM apenas como camada de comunicação | A classificação permanece determinística e auditável |
-| FastAPI | Simplicidade, desempenho, Swagger automático e integração com Python |
-| Docker | Reprodutibilidade |
-| Kubernetes + HPA | Escalabilidade automática baseada em demanda |
-| Formato Prometheus | Padrão de mercado para exposição de métricas |
+| Decisão                                           | Motivo                                                                                                                                          |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Regressão Logística como modelo principal         | Bom desempenho, treinamento rápido, probabilidades calibráveis, compatibilidade com SHAP e interpretabilidade superior a modelos mais complexos |
+| Algoritmo Genético implementado manualmente       | Atende diretamente ao requisito e permite controlar cada operador                                                                               |
+| `solver` e `penalty` em um único gene             | Impede combinações inválidas durante crossover e mutação                                                                                        |
+| Recall com peso 50% no fitness                    | Reduzir falsos negativos é prioritário em diagnóstico                                                                                           |
+| Cache de fitness                                  | Evita retreinar indivíduos repetidos e reduz o tempo de execução                                                                                |
+| Threshold escolhido por F2 em dados _out-of-fold_ | Prioriza sensibilidade sem utilizar o conjunto de teste                                                                                         |
+| Threshold fora do modelo                          | Permite ajuste sem novo treinamento                                                                                                             |
+| SHAP (`LinearExplainer`)                          | Explicabilidade global e individual exata para modelos lineares                                                                                 |
+| LLM apenas como camada de comunicação             | A classificação permanece determinística e auditável                                                                                            |
+| FastAPI                                           | Simplicidade, desempenho, Swagger automático e integração com Python                                                                            |
+| Docker                                            | Reprodutibilidade                                                                                                                               |
+| Kubernetes + HPA                                  | Escalabilidade automática baseada em demanda                                                                                                    |
+| Formato Prometheus                                | Padrão de mercado para exposição de métricas                                                                                                    |
 
 ---
 
@@ -840,21 +845,22 @@ Requisições à API                     Pods em execução
 
 # 24. Desafios Enfrentados e Soluções
 
-| Desafio | Solução |
-|---|---|
-| Combinações inválidas de `solver` e `penalty` geradas por crossover/mutação | Agrupamento de `solver/penalty` em um único gene |
-| Custo de retreinar indivíduos repetidos ao longo das gerações | Cache de fitness por indivíduo |
-| Escolher o threshold sem contaminar o conjunto de teste | Probabilidades *out-of-fold* geradas apenas no treino |
-| Threshold 0,34 não confirmou ganho de Recall no teste | Resultado documentado; threshold externo ao modelo permite ajuste sem retreino |
-| Metrics Server não coletava métricas no Docker Desktop (certificado do kubelet) | `--kubelet-insecure-tls` apenas no ambiente local |
-| HPA depende de `resources.requests` de CPU no Deployment | Definição de requests no `deployment.yaml` |
-| Custo e dependência externa da LLM nos testes | `mock` nos testes automatizados; validação real em testes manuais |
-| Avisos de depreciação do parâmetro `penalty` no scikit-learn 1.8 | Verificado que a penalidade L1 continua sendo aplicada (coeficientes zerados); avisos suprimidos nos notebooks |
-| Pods reiniciados durante o teste de carga (probe com timeout de 1 s) | `timeoutSeconds: 5` e `failureThreshold: 3`; sucesso de 38% → 61% |
-| API não iniciava sem `OPENAI_API_KEY` | Cliente da OpenAI criado apenas na primeira chamada |
-| Falha da LLM derrubava o `/interpret` inteiro | Fallback: resposta com predição e SHAP, `explicacao_llm: null` e aviso |
-| Scripts manuais dentro de `tests/` eram executados pelo pytest (exigiam a API e consumiam créditos) | Movidos para `scripts/` |
-| Serviços sem uso no ambiente (PostgreSQL e n8n) | Removidos do `docker-compose.yml` |
+| Desafio                                                                                             | Solução                                                                                                                                             |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Combinações inválidas de `solver` e `penalty` geradas por crossover/mutação                         | Agrupamento de `solver/penalty` em um único gene                                                                                                    |
+| Custo de retreinar indivíduos repetidos ao longo das gerações                                       | Cache de fitness por indivíduo                                                                                                                      |
+| Escolher o threshold sem contaminar o conjunto de teste                                             | Probabilidades _out-of-fold_ geradas apenas no treino                                                                                               |
+| Threshold 0,34 não confirmou ganho de Recall no teste                                               | Resultado documentado; threshold externo ao modelo permite ajuste sem retreino                                                                      |
+| Metrics Server não coletava métricas no Docker Desktop (certificado do kubelet)                     | `--kubelet-insecure-tls` apenas no ambiente local                                                                                                   |
+| HPA depende de `resources.requests` de CPU no Deployment                                            | Definição de requests no `deployment.yaml`                                                                                                          |
+| Custo e dependência externa da LLM nos testes                                                       | `mock` nos testes automatizados; validação real em testes manuais                                                                                   |
+| Avisos de depreciação do parâmetro `penalty` no scikit-learn 1.8                                    | Verificado que a penalidade L1 continua sendo aplicada (coeficientes zerados); avisos suprimidos nos notebooks                                      |
+| Pods reiniciados durante o teste de carga (probe com timeout de 1 s)                                | `timeoutSeconds: 5` e `failureThreshold: 3`; sucesso de 38% → 61%                                                                                   |
+| API não iniciava sem `OPENAI_API_KEY`                                                               | Cliente da OpenAI criado apenas na primeira chamada                                                                                                 |
+| Falha da LLM derrubava o `/interpret` inteiro                                                       | Fallback: resposta com predição e SHAP, `explicacao_llm: null` e aviso                                                                              |
+| Scripts manuais dentro de `tests/` eram executados pelo pytest (exigiam a API e consumiam créditos) | Movidos para `scripts/`                                                                                                                             |
+| Serviços sem uso no ambiente (PostgreSQL e n8n)                                                     | Removidos do `docker-compose.yml`                                                                                                                   |
+| LLM-as-a-judge penalizou informações corretas da v2 (fidelidade 2,5)                                | Causa identificada nas justificativas: o juiz não recebia o mesmo contexto do gerador. Resultado documentado e combinado com a avaliação automática |
 
 ---
 
@@ -865,7 +871,7 @@ Requisições à API                     Pods em execução
 - O espaço de busca do Algoritmo Genético (90 combinações) é pequeno; os três experimentos convergiram para a mesma solução;
 - A classificação produzida pelo modelo não deve ser interpretada como diagnóstico médico definitivo;
 - A LLM não realiza diagnóstico e não possui acesso a histórico clínico, exames adicionais ou contexto médico completo;
-- A avaliação da LLM utiliza poucos casos (4) e o avaliador automático é da mesma família de modelo que gera as respostas;
+- A avaliação da LLM utiliza poucos casos (4); o juiz é da mesma família de modelo que gera as respostas e não recebeu o mesmo contexto da v2, o que reduziu artificialmente a nota de fidelidade;
 - A infraestrutura Kubernetes foi implementada localmente no Docker Desktop; um ambiente de produção exigiria configurações adicionais de segurança, alta disponibilidade, observabilidade e gestão de infraestrutura.
 
 ---
@@ -874,6 +880,7 @@ Requisições à API                     Pods em execução
 
 - Ampliar o espaço de busca do Algoritmo Genético (valores contínuos de `C`, `elasticnet`/`l1_ratio`, outros modelos da Fase 1), onde a busca evolutiva traz mais vantagem sobre a busca exaustiva;
 - Seleção por torneio, que mantém pressão seletiva mesmo quando os fitness são muito próximos;
+- Fornecer ao juiz o mesmo contexto do prompt gerador e tornar a seção "Pontos de atenção" específica para cada caso;
 - Avaliação da LLM em um número maior de casos e com avaliadores humanos da área da saúde;
 - Benchmark de latência (p50/p95/p99) com carga controlada;
 - Implantação em ambiente de nuvem com infraestrutura como código;
@@ -892,7 +899,7 @@ A arquitetura implementada integra Machine Learning, Algoritmos Genéticos, expl
 
 O Algoritmo Genético encontrou, nos três experimentos, a configuração `C = 0.1`, `class_weight = balanced`, `liblinear/l2`, que no conjunto de teste superou o modelo da Fase 1 em todas as métricas (Recall de 0,952 para 0,976, F1 de 0,964 para 0,988 e falsos negativos de 2 para 1).
 
-O threshold de decisão foi analisado separadamente com dados *out-of-fold*. A redução para 0,30, recomendada na avaliação da Fase 1, foi testada e não eliminou os falsos negativos: o ganho de sensibilidade veio do Algoritmo Genético. O SHAP mostrou explicações consistentes entre os modelos e permitiu entender o falso negativo restante.
+O threshold de decisão foi analisado separadamente com dados _out-of-fold_. A redução para 0,30, recomendada na avaliação da Fase 1, foi testada e não eliminou os falsos negativos: o ganho de sensibilidade veio do Algoritmo Genético. O SHAP mostrou explicações consistentes entre os modelos e permitiu entender o falso negativo restante.
 
 A LLM transformou essas informações técnicas em explicações estruturadas em linguagem natural, mantendo o modelo de Machine Learning como responsável pela classificação. O prompt evoluiu para uma versão com zona de incerteza, percentis e pontos de atenção, e a qualidade foi avaliada de forma manual, automática e por LLM.
 
