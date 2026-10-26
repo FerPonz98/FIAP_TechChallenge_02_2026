@@ -647,7 +647,7 @@ Kubernetes foi utilizado para demonstrar a escalabilidade automática exigida pe
 | Recurso                 | Função                                                                                                                                                                      |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Deployment              | Executa os pods da API: `requests` 100m CPU / 256Mi, `limits` 500m CPU / 512Mi; probes de readiness e liveness em `/health` com `timeoutSeconds: 5` e `failureThreshold: 3` |
-| Service                 | Tipo `LoadBalancer`; no Docker Desktop a API fica em `http://localhost:8000`                                                                                                |
+| Service                 | Tipo `LoadBalancer` na porta 8010 (`targetPort` 8000); no Docker Desktop a API fica em `http://localhost:8010`, deixando a porta 8000 livre para o docker compose           |
 | HorizontalPodAutoscaler | Escala os pods com base na CPU                                                                                                                                              |
 | Secret                  | Armazena `OPENAI_API_KEY` e `LLM_MODEL`                                                                                                                                     |
 
@@ -699,7 +699,7 @@ CPU: 252m | CPU%: 1% | Memória: 2872Mi | Memória%: 18%
 
 # 18. Teste de Escalabilidade
 
-Foi realizado um teste de carga (`scripts/load_test.py`) contra `POST /predict`. O `/interpret` não foi utilizado para não consumir créditos da OpenAI.
+Foi realizado um teste de carga (`scripts/load_test.py`, opção 6 do `projeto.bat`) contra `POST /predict` da API no Kubernetes. O `/interpret` não foi utilizado para não consumir créditos da OpenAI.
 
 | Parâmetro                 | Execução 1 (probes padrão) | Execução final (probes ajustadas) |
 | ------------------------- | -------------------------- | --------------------------------- |

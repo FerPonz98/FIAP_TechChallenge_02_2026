@@ -76,6 +76,7 @@ k8s/                         # Deployment, Service, HPA, Secret (exemplo), patch
 docs/                        # arquitetura.md e evidências do autoscaling
 models/modelo_ga_fase2.joblib
 results/                     # métricas, gráficos e avaliações geradas pelos notebooks
+projeto.bat                  # menu para executar o projeto no Windows (duplo clique)
 ```
 
 ---
@@ -100,7 +101,26 @@ TZ=America/La_Paz
 
 Sem `OPENAI_API_KEY` a API inicia normalmente; apenas `/interpret` responde sem a explicação da LLM.
 
-### 4.2 Docker
+### 4.2 Execução com um clique (Windows)
+
+Execute **`projeto.bat`** (duplo clique) e escolha a opção no menu:
+
+```text
+ PROJETO
+  [1] Iniciar projeto (API + Jupyter)
+  [2] Encerrar projeto
+  [3] Verificar status
+  [4] Executar testes automatizados
+
+ KUBERNETES
+  [5] Implantar no Kubernetes (HPA)
+  [6] Executar teste de carga (autoscaling)
+  [7] Remover do Kubernetes
+```
+
+A opção 1 verifica o Docker, cria o `.env` (se não existir), sobe os containers e abre o Swagger e o Jupyter no navegador.
+
+### 4.3 Docker (manual)
 
 ```bash
 docker compose up -d --build
@@ -113,7 +133,7 @@ docker compose up -d --build
 
 Execute os notebooks no Jupyter, nesta ordem: `01 → 02 → 03 → 04`.
 
-### 4.3 Sem Docker (ambiente virtual)
+### 4.4 Sem Docker (ambiente virtual)
 
 ```bash
 python -m venv .venv
@@ -122,7 +142,7 @@ pip install -r requirements.txt
 uvicorn api.main:app --reload
 ```
 
-### 4.4 Testes
+### 4.5 Testes
 
 ```bash
 docker compose exec api python -m pytest tests/ -v
@@ -155,10 +175,27 @@ No Swagger, `/predict` e `/interpret` já trazem um paciente de exemplo.
 
 ## 6. Kubernetes e escalabilidade automática
 
+No Windows, use as opções **5** (implantar) e **6** (teste de carga) do `projeto.bat`. Manualmente:
+
 ```bash
 docker build -t fiap-fase2-api:latest .
 kubectl create secret generic fiap-fase2-secrets --from-env-file=.env
 kubectl apply -f k8s/deployment.yaml -f k8s/service.yaml -f k8s/hpa.yaml
+```
+
+| Ambiente       | Endereço da API            |
+| -------------- | -------------------------- |
+| Docker Compose | http://localhost:8000/docs |
+| Kubernetes     | http://localhost:8010/docs |
+
+Os dois ambientes usam portas diferentes e podem funcionar ao mesmo tempo.
+
+Teste de carga e acompanhamento do autoscaling (em terminais separados):
+
+```bash
+python scripts/load_test.py      # usa http://localhost:8010 por padrão
+kubectl get hpa -w
+kubectl get pods -w
 ```
 
 - **HPA:** 1 a 5 réplicas, meta de 60% de CPU (sobre `requests` de 100m).

@@ -11,6 +11,8 @@ spec:
     app: fiap-fase2-api
 
   ports:
+    # A API do Kubernetes fica em http://localhost:8010
+    # (a porta 8000 continua livre para a API do docker compose).
     - protocol: TCP
-      port: 8000
+      port: 8010
       targetPort: 8000

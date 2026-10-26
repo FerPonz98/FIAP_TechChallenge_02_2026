@@ -1,7 +1,7 @@
 numpy
 pandas
 scipy
-scikit-learn
+scikit-learn>=1.8,<1.10
 matplotlib
 seaborn
 shap
@@ -12,12 +12,12 @@ ipykernel
 
 fastapi
 uvicorn[standard]
-pydantic
+pydantic>=2
 
 python-dotenv
 httpx
 requests
-openai
+openai>=1.66
 
 prometheus-client
 

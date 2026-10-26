@@ -1,3 +1,5 @@
+import os
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -5,7 +7,15 @@ import pandas as pd
 import requests
 
 
-URL = "http://localhost:8000/predict"
+# Por padrão, o teste de carga é feito contra a API do Kubernetes (porta 8010).
+# Para usar outra URL: python scripts/load_test.py http://localhost:8000
+BASE_URL = (
+    sys.argv[1]
+    if len(sys.argv) > 1
+    else os.getenv("API_URL", "http://localhost:8010")
+)
+
+URL = BASE_URL.rstrip("/") + "/predict"
 
 DURACAO_SEGUNDOS = 120
 
@@ -62,6 +72,10 @@ def executar_carga():
 
     print(
         "Iniciando teste de carga..."
+    )
+
+    print(
+        f"URL: {URL}"
     )
 
     print(
