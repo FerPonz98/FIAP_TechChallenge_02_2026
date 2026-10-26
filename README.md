@@ -4,7 +4,7 @@
 
 Evolução do modelo de classificação de câncer de mama da Fase 1 com **Algoritmo Genético** para otimização de hiperparâmetros, **SHAP** para explicabilidade, **LLM** para interpretação em linguagem natural, API REST, observabilidade e **escalabilidade automática com Kubernetes (HPA)**.
 
-**Integrantes:** Felipe Antonio Ayancan Hernandez · Fernando Ponz Vargas
+**Integrantes:**Fernando Ponz Vargas
 
 **Vídeo de demonstração:** <!-- PREENCHER: link do YouTube/Vimeo -->
 
